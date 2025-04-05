@@ -1,0 +1,97 @@
+{
+	"name": "df_rtlloc",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_adls",
+						"type": "DatasetReference"
+					},
+					"name": "adlsrtloc"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_adls_parquet",
+						"type": "DatasetReference"
+					},
+					"name": "regn"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_adls_parquet",
+						"type": "DatasetReference"
+					},
+					"name": "districttable"
+				}
+			],
+			"transformations": [
+				{
+					"name": "regionselect"
+				},
+				{
+					"name": "distinctregion"
+				},
+				{
+					"name": "districtselect"
+				},
+				{
+					"name": "distinctdistrict"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          str as short,",
+				"          str_label as string,",
+				"          dstr as short,",
+				"          dstr_label as string,",
+				"          rgn as short,",
+				"          rgn_label as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     inferDriftedColumnTypes: true,",
+				"     ignoreNoFilesFound: false) ~> adlsrtloc",
+				"adlsrtloc select(mapColumn(",
+				"          rgn,",
+				"          rgn_label",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> regionselect",
+				"regionselect aggregate(groupBy(rgn),",
+				"     rgn_label = first(rgn_label)) ~> distinctregion",
+				"adlsrtloc select(mapColumn(",
+				"          dstr,",
+				"          dstr_label,",
+				"          rgn",
+				"     ),",
+				"     partitionBy('hash', 1),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> districtselect",
+				"districtselect aggregate(groupBy(dstr),",
+				"     each(match(name!='dstr'), $$ = first($$))) ~> distinctdistrict",
+				"distinctregion sink(allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> regn",
+				"distinctdistrict sink(allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> districttable"
+			]
+		}
+	}
+}
