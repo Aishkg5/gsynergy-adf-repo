@@ -19,6 +19,41 @@
 						"type": "DatasetReference"
 					},
 					"name": "stylclrtable"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_adls_parquet",
+						"type": "DatasetReference"
+					},
+					"name": "prodtable"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_adls_parquet",
+						"type": "DatasetReference"
+					},
+					"name": "styletable"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_adls_parquet",
+						"type": "DatasetReference"
+					},
+					"name": "subcattable"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_adls_parquet",
+						"type": "DatasetReference"
+					},
+					"name": "catgtable"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_adls_parquet",
+						"type": "DatasetReference"
+					},
+					"name": "depttable"
 				}
 			],
 			"transformations": [
@@ -26,16 +61,16 @@
 					"name": "product"
 				},
 				{
-					"name": "aggregate1"
+					"name": "DistinctStylclr"
 				},
 				{
-					"name": "style"
+					"name": "stylclrselect"
 				},
 				{
-					"name": "styles"
+					"name": "styleselect"
 				},
 				{
-					"name": "aggregate2"
+					"name": "distinctStyl"
 				},
 				{
 					"name": "subcatselect"
@@ -50,10 +85,10 @@
 					"name": "ditsinctCatg"
 				},
 				{
-					"name": "selectDept"
+					"name": "deptselect"
 				},
 				{
-					"name": "aggregate3"
+					"name": "distinctDept"
 				}
 			],
 			"scriptLines": [
@@ -88,8 +123,8 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> product",
-				"style aggregate(groupBy(stylclr_id),",
-				"     each(match(name!='stylclr_id'), $$ = first($$))) ~> aggregate1",
+				"stylclrselect aggregate(groupBy(stylclr_id),",
+				"     each(match(name!='stylclr_id'), $$ = first($$))) ~> DistinctStylclr",
 				"adlsprod select(mapColumn(",
 				"          stylclr_id,",
 				"          stylclr_label,",
@@ -97,7 +132,7 @@
 				"     ),",
 				"     partitionBy('hash', 1),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> style",
+				"     skipDuplicateMapOutputs: true) ~> stylclrselect",
 				"adlsprod select(mapColumn(",
 				"          styl_id,",
 				"          styl_label,",
@@ -105,9 +140,9 @@
 				"     ),",
 				"     partitionBy('hash', 1),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> styles",
-				"styles aggregate(groupBy(styl_id),",
-				"     each(match(name!='styl_id'), $$ = first($$))) ~> aggregate2",
+				"     skipDuplicateMapOutputs: true) ~> styleselect",
+				"styleselect aggregate(groupBy(styl_id),",
+				"     each(match(name!='styl_id'), $$ = first($$))) ~> distinctStyl",
 				"adlsprod select(mapColumn(",
 				"          subcat_id,",
 				"          subcat_label,",
@@ -131,10 +166,10 @@
 				"          dept_label",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> selectDept",
-				"selectDept aggregate(groupBy(dept_id),",
-				"     dept_label = first(dept_label)) ~> aggregate3",
-				"aggregate1 sink(allowSchemaDrift: true,",
+				"     skipDuplicateMapOutputs: true) ~> deptselect",
+				"deptselect aggregate(groupBy(dept_id),",
+				"     dept_label = first(dept_label)) ~> distinctDept",
+				"DistinctStylclr sink(allowSchemaDrift: true,",
 				"     validateSchema: true,",
 				"     format: 'parquet',",
 				"     umask: 0022,",
@@ -142,7 +177,52 @@
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     partitionBy('hash', 1)) ~> stylclrtable"
+				"     partitionBy('hash', 1)) ~> stylclrtable",
+				"product sink(allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> prodtable",
+				"distinctStyl sink(allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> styletable",
+				"distinctsubcat sink(allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> subcattable",
+				"ditsinctCatg sink(allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> catgtable",
+				"distinctDept sink(allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> depttable"
 			]
 		}
 	}
