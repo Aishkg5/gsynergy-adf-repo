@@ -18,8 +18,14 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "hier.pricestate.dlm",
-				"fileSystem": "drivefiles"
+				"fileName": {
+					"value": "@dataset().p_ds_file_name",
+					"type": "Expression"
+				},
+				"fileSystem": {
+					"value": "@dataset().p_ds_container",
+					"type": "Expression"
+				}
 			},
 			"columnDelimiter": "|",
 			"escapeChar": "\\",

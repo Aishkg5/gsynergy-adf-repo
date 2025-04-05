@@ -15,7 +15,7 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "ds_adls",
+						"referenceName": "ds_adls_parquet",
 						"type": "DatasetReference"
 					},
 					"name": "statesink"
@@ -50,6 +50,7 @@
 				"     partitionBy('hash', 1)) ~> state",
 				"state sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
+				"     format: 'parquet',",
 				"     umask: 0022,",
 				"     preCommands: [],",
 				"     postCommands: [],",
