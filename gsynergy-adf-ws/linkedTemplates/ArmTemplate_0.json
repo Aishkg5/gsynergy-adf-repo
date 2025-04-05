@@ -98,6 +98,10 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
+						"folderPath": {
+							"value": "@dataset().ds_sink_fn",
+							"type": "Expression"
+						},
 						"fileSystem": "oltpraw"
 					},
 					"compressionCodec": "snappy"
@@ -159,10 +163,8 @@
 						"     validateSchema: true,",
 						"     inferDriftedColumnTypes: true,",
 						"     ignoreNoFilesFound: false,",
-						"     enableCdc: true,",
-						"     mode: 'read',",
-						"     skipInitialLoad: false,",
-						"     partitionBy('hash', 1)) ~> adlsPricestate",
+						"     partitionBy('hash', 1),",
+						"     mode: 'read') ~> adlsPricestate",
 						"adlsPricestate select(mapColumn(",
 						"          substate_id,",
 						"          substate_label,",
@@ -199,14 +201,609 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/df_prod')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_adls",
+								"type": "DatasetReference"
+							},
+							"name": "adlsprod"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ds_adls_parquet",
+								"type": "DatasetReference"
+							},
+							"name": "stylclrtable"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_adls_parquet",
+								"type": "DatasetReference"
+							},
+							"name": "prodtable"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_adls_parquet",
+								"type": "DatasetReference"
+							},
+							"name": "styletable"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_adls_parquet",
+								"type": "DatasetReference"
+							},
+							"name": "subcattable"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_adls_parquet",
+								"type": "DatasetReference"
+							},
+							"name": "catgtable"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_adls_parquet",
+								"type": "DatasetReference"
+							},
+							"name": "depttable"
+						}
+					],
+					"transformations": [
+						{
+							"name": "product"
+						},
+						{
+							"name": "DistinctStylclr"
+						},
+						{
+							"name": "stylclrselect"
+						},
+						{
+							"name": "styleselect"
+						},
+						{
+							"name": "distinctStyl"
+						},
+						{
+							"name": "subcatselect"
+						},
+						{
+							"name": "distinctsubcat"
+						},
+						{
+							"name": "catselect"
+						},
+						{
+							"name": "ditsinctCatg"
+						},
+						{
+							"name": "deptselect"
+						},
+						{
+							"name": "distinctDept"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          sku_id as string,",
+						"          sku_label as string,",
+						"          stylclr_id as string,",
+						"          stylclr_label as string,",
+						"          styl_id as string,",
+						"          styl_label as string,",
+						"          subcat_id as short,",
+						"          subcat_label as string,",
+						"          cat_id as short,",
+						"          cat_label as string,",
+						"          dept_id as short,",
+						"          dept_label as string,",
+						"          issvc as boolean,",
+						"          isasmbly as boolean,",
+						"          isnfs as boolean",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: true,",
+						"     inferDriftedColumnTypes: true,",
+						"     ignoreNoFilesFound: false) ~> adlsprod",
+						"adlsprod select(mapColumn(",
+						"          sku_id,",
+						"          sku_label,",
+						"          stylclr_id,",
+						"          issvc,",
+						"          isasmbly,",
+						"          isnfs",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> product",
+						"stylclrselect aggregate(groupBy(stylclr_id),",
+						"     each(match(name!='stylclr_id'), $$ = first($$))) ~> DistinctStylclr",
+						"adlsprod select(mapColumn(",
+						"          stylclr_id,",
+						"          stylclr_label,",
+						"          styl_id",
+						"     ),",
+						"     partitionBy('hash', 1),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> stylclrselect",
+						"adlsprod select(mapColumn(",
+						"          styl_id,",
+						"          styl_label,",
+						"          subcat_id",
+						"     ),",
+						"     partitionBy('hash', 1),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> styleselect",
+						"styleselect aggregate(groupBy(styl_id),",
+						"     each(match(name!='styl_id'), $$ = first($$))) ~> distinctStyl",
+						"adlsprod select(mapColumn(",
+						"          subcat_id,",
+						"          subcat_label,",
+						"          cat_id",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> subcatselect",
+						"subcatselect aggregate(groupBy(subcat_id),",
+						"     each(match(name!='subcat_id'), $$ = first($$))) ~> distinctsubcat",
+						"adlsprod select(mapColumn(",
+						"          cat_id,",
+						"          cat_label,",
+						"          dept_id",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> catselect",
+						"catselect aggregate(groupBy(cat_id),",
+						"     each(match(name!='cat_id'), $$ = first($$))) ~> ditsinctCatg",
+						"adlsprod select(mapColumn(",
+						"          dept_id,",
+						"          dept_label",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> deptselect",
+						"deptselect aggregate(groupBy(dept_id),",
+						"     dept_label = first(dept_label)) ~> distinctDept",
+						"DistinctStylclr sink(allowSchemaDrift: true,",
+						"     validateSchema: true,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> stylclrtable",
+						"product sink(allowSchemaDrift: true,",
+						"     validateSchema: true,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> prodtable",
+						"distinctStyl sink(allowSchemaDrift: true,",
+						"     validateSchema: true,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> styletable",
+						"distinctsubcat sink(allowSchemaDrift: true,",
+						"     validateSchema: true,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> subcattable",
+						"ditsinctCatg sink(allowSchemaDrift: true,",
+						"     validateSchema: true,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> catgtable",
+						"distinctDept sink(allowSchemaDrift: true,",
+						"     validateSchema: true,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> depttable"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_adls')]",
+				"[concat(variables('factoryId'), '/datasets/ds_adls_parquet')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_site')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_adls",
+								"type": "DatasetReference"
+							},
+							"name": "adlsposite"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ds_adls_parquet",
+								"type": "DatasetReference"
+							},
+							"name": "subchnl"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_adls_parquet",
+								"type": "DatasetReference"
+							},
+							"name": "chnltable"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_adls_parquet",
+								"type": "DatasetReference"
+							},
+							"name": "sitetable"
+						}
+					],
+					"transformations": [
+						{
+							"name": "chnlselect"
+						},
+						{
+							"name": "distinctchnl"
+						},
+						{
+							"name": "subchnlselect"
+						},
+						{
+							"name": "distinctsubchnl"
+						},
+						{
+							"name": "siteselect"
+						},
+						{
+							"name": "distictsite"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          site_id as string,",
+						"          site_label as string,",
+						"          subchnl_id as string,",
+						"          subchnl_label as string,",
+						"          chnl_id as string,",
+						"          chnl_label as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: true,",
+						"     inferDriftedColumnTypes: true,",
+						"     ignoreNoFilesFound: false) ~> adlsposite",
+						"adlsposite select(mapColumn(",
+						"          chnl_id,",
+						"          chnl_label",
+						"     ),",
+						"     partitionBy('hash', 1),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> chnlselect",
+						"chnlselect aggregate(groupBy(chnl_id),",
+						"     chnl_label = first(chnl_label)) ~> distinctchnl",
+						"adlsposite select(mapColumn(",
+						"          subchnl_id,",
+						"          subchnl_label,",
+						"          chnl_id",
+						"     ),",
+						"     partitionBy('hash', 1),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> subchnlselect",
+						"subchnlselect aggregate(groupBy(subchnl_id),",
+						"     each(match(name!='subchnl_id'), $$ = first($$))) ~> distinctsubchnl",
+						"adlsposite select(mapColumn(",
+						"          site_id,",
+						"          site_label,",
+						"          subchnl_id",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> siteselect",
+						"siteselect aggregate(groupBy(site_id),",
+						"     each(match(name!='site_id'), $$ = first($$))) ~> distictsite",
+						"distinctsubchnl sink(allowSchemaDrift: true,",
+						"     validateSchema: true,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> subchnl",
+						"distinctchnl sink(allowSchemaDrift: true,",
+						"     validateSchema: true,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> chnltable",
+						"distictsite sink(allowSchemaDrift: true,",
+						"     validateSchema: true,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> sitetable"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_adls')]",
+				"[concat(variables('factoryId'), '/datasets/ds_adls_parquet')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_rtlloc')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_adls",
+								"type": "DatasetReference"
+							},
+							"name": "adlsrtloc"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ds_adls_parquet",
+								"type": "DatasetReference"
+							},
+							"name": "regn"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_adls_parquet",
+								"type": "DatasetReference"
+							},
+							"name": "districttable"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_adls_parquet",
+								"type": "DatasetReference"
+							},
+							"name": "streettable"
+						}
+					],
+					"transformations": [
+						{
+							"name": "regionselect"
+						},
+						{
+							"name": "distinctregion"
+						},
+						{
+							"name": "districtselect"
+						},
+						{
+							"name": "distinctdistrict"
+						},
+						{
+							"name": "strtselect"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          str as short,",
+						"          str_label as string,",
+						"          dstr as short,",
+						"          dstr_label as string,",
+						"          rgn as short,",
+						"          rgn_label as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: true,",
+						"     inferDriftedColumnTypes: true,",
+						"     ignoreNoFilesFound: false) ~> adlsrtloc",
+						"adlsrtloc select(mapColumn(",
+						"          rgn,",
+						"          rgn_label",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> regionselect",
+						"regionselect aggregate(groupBy(rgn),",
+						"     rgn_label = first(rgn_label)) ~> distinctregion",
+						"adlsrtloc select(mapColumn(",
+						"          dstr,",
+						"          dstr_label,",
+						"          rgn",
+						"     ),",
+						"     partitionBy('hash', 1),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> districtselect",
+						"districtselect aggregate(groupBy(dstr),",
+						"     each(match(name!='dstr'), $$ = first($$))) ~> distinctdistrict",
+						"adlsrtloc select(mapColumn(",
+						"          str,",
+						"          str_label,",
+						"          dstr",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> strtselect",
+						"distinctregion sink(allowSchemaDrift: true,",
+						"     validateSchema: true,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> regn",
+						"distinctdistrict sink(allowSchemaDrift: true,",
+						"     validateSchema: true,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> districttable",
+						"strtselect sink(allowSchemaDrift: true,",
+						"     validateSchema: true,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> streettable"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_adls')]",
+				"[concat(variables('factoryId'), '/datasets/ds_adls_parquet')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_loc')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_adls",
+								"type": "DatasetReference"
+							},
+							"name": "invlocadls"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ds_adls_parquet",
+								"type": "DatasetReference"
+							},
+							"name": "loctable"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_adls_parquet",
+								"type": "DatasetReference"
+							},
+							"name": "loctypetable"
+						}
+					],
+					"transformations": [
+						{
+							"name": "locselect"
+						},
+						{
+							"name": "loctypeselect"
+						},
+						{
+							"name": "distinctloctype"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          loc as short,",
+						"          loc_label as string,",
+						"          loctype as string,",
+						"          loctype_label as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: true,",
+						"     inferDriftedColumnTypes: true,",
+						"     ignoreNoFilesFound: false,",
+						"     partitionBy('hash', 1)) ~> invlocadls",
+						"invlocadls select(mapColumn(",
+						"          loc,",
+						"          loc_label,",
+						"          loctype",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> locselect",
+						"invlocadls select(mapColumn(",
+						"          loctype,",
+						"          loctype_label",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> loctypeselect",
+						"loctypeselect aggregate(groupBy(loctype),",
+						"     loctype_label = first(loctype_label)) ~> distinctloctype",
+						"locselect sink(allowSchemaDrift: true,",
+						"     validateSchema: true,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> loctable",
+						"distinctloctype sink(allowSchemaDrift: true,",
+						"     validateSchema: true,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> loctypetable"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_adls')]",
+				"[concat(variables('factoryId'), '/datasets/ds_adls_parquet')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/pl_pricestate')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "pricestate",
-						"type": "ExecuteDataFlow",
+						"name": "Get drive files",
+						"type": "GetMetadata",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "0.12:00:00",
@@ -217,42 +814,385 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"dataflow": {
-								"referenceName": "df_pricestate",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"adlsPricestate": {
-										"p_ds_container": "drivefiles",
-										"p_ds_file_name": "hier.pricestate.dlm"
+							"dataset": {
+								"referenceName": "ds_adls",
+								"type": "DatasetReference",
+								"parameters": {
+									"p_ds_container": {
+										"value": "@pipeline().parameters.p_pl_container",
+										"type": "Expression"
 									},
-									"statesink": {
-										"ds_sink_fn": "price_state"
-									},
-									"substatesink": {
-										"ds_sink_fn": "price_substate"
+									"p_ds_file_name": {
+										"value": "@pipeline().parameters.p_pl_inp_file",
+										"type": "Expression"
 									}
 								}
 							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
 							},
-							"traceLevel": "Fine",
-							"continuationSettings": {
-								"customizedCheckpointKey": "63fb8dd6-b036-44d1-a15d-259d64cfa058"
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
 							}
+						}
+					},
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get drive files",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get drive files').output.childItems",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Switch on files",
+									"type": "Switch",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"on": {
+											"value": "@split(item().name,'.')[1]",
+											"type": "Expression"
+										},
+										"cases": [
+											{
+												"value": "possite",
+												"activities": [
+													{
+														"name": "site",
+														"type": "ExecuteDataFlow",
+														"state": "Inactive",
+														"onInactiveMarkAs": "Succeeded",
+														"dependsOn": [],
+														"policy": {
+															"timeout": "0.12:00:00",
+															"retry": 0,
+															"retryIntervalInSeconds": 30,
+															"secureOutput": false,
+															"secureInput": false
+														},
+														"userProperties": [],
+														"typeProperties": {
+															"dataflow": {
+																"referenceName": "df_site",
+																"type": "DataFlowReference",
+																"parameters": {},
+																"datasetParameters": {
+																	"adlsposite": {
+																		"p_ds_container": {
+																			"value": "@pipeline().parameters.p_pl_container",
+																			"type": "Expression"
+																		},
+																		"p_ds_file_name": {
+																			"value": "@item().name",
+																			"type": "Expression"
+																		}
+																	},
+																	"subchnl": {
+																		"ds_sink_fn": "subchnl"
+																	},
+																	"chnltable": {
+																		"ds_sink_fn": "chnl"
+																	},
+																	"sitetable": {
+																		"ds_sink_fn": "site"
+																	}
+																},
+																"linkedServiceParameters": {}
+															},
+															"staging": {},
+															"compute": {
+																"coreCount": 8,
+																"computeType": "General"
+															},
+															"traceLevel": "Fine"
+														}
+													}
+												]
+											},
+											{
+												"value": "pricestate",
+												"activities": [
+													{
+														"name": "pricestate",
+														"type": "ExecuteDataFlow",
+														"state": "Inactive",
+														"onInactiveMarkAs": "Succeeded",
+														"dependsOn": [],
+														"policy": {
+															"timeout": "0.12:00:00",
+															"retry": 0,
+															"retryIntervalInSeconds": 30,
+															"secureOutput": false,
+															"secureInput": false
+														},
+														"userProperties": [],
+														"typeProperties": {
+															"dataflow": {
+																"referenceName": "df_pricestate",
+																"type": "DataFlowReference",
+																"parameters": {},
+																"datasetParameters": {
+																	"adlsPricestate": {
+																		"p_ds_container": {
+																			"value": "@pipeline().parameters.p_pl_container",
+																			"type": "Expression"
+																		},
+																		"p_ds_file_name": {
+																			"value": "@item().name",
+																			"type": "Expression"
+																		}
+																	},
+																	"statesink": {
+																		"ds_sink_fn": "price_state"
+																	},
+																	"substatesink": {
+																		"ds_sink_fn": "price_substate"
+																	}
+																},
+																"linkedServiceParameters": {}
+															},
+															"staging": {},
+															"compute": {
+																"coreCount": 8,
+																"computeType": "General"
+															},
+															"traceLevel": "Fine"
+														}
+													}
+												]
+											},
+											{
+												"value": "prod",
+												"activities": [
+													{
+														"name": "prod",
+														"type": "ExecuteDataFlow",
+														"state": "Inactive",
+														"onInactiveMarkAs": "Succeeded",
+														"dependsOn": [],
+														"policy": {
+															"timeout": "0.12:00:00",
+															"retry": 0,
+															"retryIntervalInSeconds": 30,
+															"secureOutput": false,
+															"secureInput": false
+														},
+														"userProperties": [],
+														"typeProperties": {
+															"dataflow": {
+																"referenceName": "df_prod",
+																"type": "DataFlowReference",
+																"parameters": {},
+																"datasetParameters": {
+																	"adlsprod": {
+																		"p_ds_container": {
+																			"value": "@pipeline().parameters.p_pl_container",
+																			"type": "Expression"
+																		},
+																		"p_ds_file_name": {
+																			"value": "@item().name",
+																			"type": "Expression"
+																		}
+																	},
+																	"stylclrtable": {
+																		"ds_sink_fn": "stylclr"
+																	},
+																	"prodtable": {
+																		"ds_sink_fn": "product"
+																	},
+																	"styletable": {
+																		"ds_sink_fn": "style"
+																	},
+																	"subcattable": {
+																		"ds_sink_fn": "subCatg"
+																	},
+																	"catgtable": {
+																		"ds_sink_fn": "catg"
+																	},
+																	"depttable": {
+																		"ds_sink_fn": "dept"
+																	}
+																},
+																"linkedServiceParameters": {}
+															},
+															"staging": {},
+															"compute": {
+																"coreCount": 8,
+																"computeType": "General"
+															},
+															"traceLevel": "Fine"
+														}
+													}
+												]
+											},
+											{
+												"value": "rtlloc",
+												"activities": [
+													{
+														"name": "rtlloc",
+														"type": "ExecuteDataFlow",
+														"dependsOn": [],
+														"policy": {
+															"timeout": "0.12:00:00",
+															"retry": 0,
+															"retryIntervalInSeconds": 30,
+															"secureOutput": false,
+															"secureInput": false
+														},
+														"userProperties": [],
+														"typeProperties": {
+															"dataflow": {
+																"referenceName": "df_rtlloc",
+																"type": "DataFlowReference",
+																"parameters": {},
+																"datasetParameters": {
+																	"adlsrtloc": {
+																		"p_ds_container": {
+																			"value": "@pipeline().parameters.p_pl_container",
+																			"type": "Expression"
+																		},
+																		"p_ds_file_name": "@item().name"
+																	},
+																	"regn": {
+																		"ds_sink_fn": "region"
+																	},
+																	"districttable": {
+																		"ds_sink_fn": "district"
+																	},
+																	"streettable": {
+																		"ds_sink_fn": "street"
+																	}
+																},
+																"linkedServiceParameters": {}
+															},
+															"staging": {},
+															"compute": {
+																"coreCount": 8,
+																"computeType": "General"
+															},
+															"traceLevel": "Fine"
+														}
+													}
+												]
+											}
+										],
+										"defaultActivities": [
+											{
+												"name": "Copytooltp",
+												"type": "Copy",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "DelimitedTextSource",
+														"storeSettings": {
+															"type": "AzureBlobFSReadSettings",
+															"recursive": true,
+															"enablePartitionDiscovery": false
+														},
+														"formatSettings": {
+															"type": "DelimitedTextReadSettings"
+														}
+													},
+													"sink": {
+														"type": "ParquetSink",
+														"storeSettings": {
+															"type": "AzureBlobFSWriteSettings"
+														},
+														"formatSettings": {
+															"type": "ParquetWriteSettings"
+														}
+													},
+													"enableStaging": false,
+													"translator": {
+														"type": "TabularTranslator",
+														"typeConversion": true,
+														"typeConversionSettings": {
+															"allowDataTruncation": true,
+															"treatBooleanAsNumber": false
+														}
+													}
+												},
+												"inputs": [
+													{
+														"referenceName": "ds_adls",
+														"type": "DatasetReference",
+														"parameters": {
+															"p_ds_container": {
+																"value": "@pipeline().parameters.p_pl_container",
+																"type": "Expression"
+															},
+															"p_ds_file_name": {
+																"value": "@item().name",
+																"type": "Expression"
+															}
+														}
+													}
+												],
+												"outputs": [
+													{
+														"referenceName": "ds_adls_parquet",
+														"type": "DatasetReference",
+														"parameters": {
+															"ds_sink_fn": {
+																"value": "@split(item().name,'.')[1]",
+																"type": "Expression"
+															}
+														}
+													}
+												]
+											}
+										]
+									}
+								}
+							]
 						}
 					}
 				],
 				"policy": {
 					"elapsedTimeMetric": {}
 				},
+				"parameters": {
+					"p_pl_container": {
+						"type": "string",
+						"defaultValue": "drivefiles"
+					},
+					"p_pl_inp_file": {
+						"type": "string"
+					}
+				},
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/df_pricestate')]"
+				"[concat(variables('factoryId'), '/datasets/ds_adls')]",
+				"[concat(variables('factoryId'), '/datasets/ds_adls_parquet')]",
+				"[concat(variables('factoryId'), '/dataflows/df_site')]",
+				"[concat(variables('factoryId'), '/dataflows/df_pricestate')]",
+				"[concat(variables('factoryId'), '/dataflows/df_prod')]",
+				"[concat(variables('factoryId'), '/dataflows/df_rtlloc')]"
 			]
 		}
 	]
