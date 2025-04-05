@@ -335,7 +335,7 @@
 														"type": "Expression"
 													},
 													"p_ds_file_name": {
-														"value": "item().name",
+														"value": "@item().name",
 														"type": "Expression"
 													}
 												}
