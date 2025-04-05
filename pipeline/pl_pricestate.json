@@ -99,7 +99,7 @@
 																	"type": "Expression"
 																},
 																"p_ds_file_name": {
-																	"value": "@pipeline().parameters.p_pl_inp_file",
+																	"value": "@item().name",
 																	"type": "Expression"
 																}
 															},
@@ -151,7 +151,7 @@
 																	"type": "Expression"
 																},
 																"p_ds_file_name": {
-																	"value": "@pipeline().parameters.p_pl_inp_file",
+																	"value": "@item().name",
 																	"type": "Expression"
 																}
 															},
@@ -200,7 +200,7 @@
 																	"type": "Expression"
 																},
 																"p_ds_file_name": {
-																	"value": "@pipeline().parameters.p_pl_inp_file",
+																	"value": "@item().name",
 																	"type": "Expression"
 																}
 															},
@@ -258,10 +258,7 @@
 																	"value": "@pipeline().parameters.p_pl_container",
 																	"type": "Expression"
 																},
-																"p_ds_file_name": {
-																	"value": "@pipeline().parameters.p_pl_inp_file",
-																	"type": "Expression"
-																}
+																"p_ds_file_name": "@item().name"
 															},
 															"regn": {
 																"ds_sink_fn": "region"
