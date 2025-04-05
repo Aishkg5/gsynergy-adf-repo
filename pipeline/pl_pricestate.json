@@ -3,106 +3,6 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "pricestate",
-				"type": "ExecuteDataFlow",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"dataflow": {
-						"referenceName": "df_pricestate",
-						"type": "DataFlowReference",
-						"datasetParameters": {
-							"adlsPricestate": {
-								"p_ds_container": {
-									"value": "@pipeline().parameters.p_pl_container",
-									"type": "Expression"
-								},
-								"p_ds_file_name": {
-									"value": "@pipeline().parameters.p_pl_inp_file",
-									"type": "Expression"
-								}
-							},
-							"statesink": {
-								"ds_sink_fn": "price_state"
-							},
-							"substatesink": {
-								"ds_sink_fn": "price_substate"
-							}
-						}
-					},
-					"compute": {
-						"coreCount": 8,
-						"computeType": "General"
-					},
-					"traceLevel": "Fine"
-				}
-			},
-			{
-				"name": "prod",
-				"type": "ExecuteDataFlow",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"dataflow": {
-						"referenceName": "df_prod",
-						"type": "DataFlowReference",
-						"datasetParameters": {
-							"adlsprod": {
-								"p_ds_container": {
-									"value": "@pipeline().parameters.p_pl_container",
-									"type": "Expression"
-								},
-								"p_ds_file_name": {
-									"value": "@pipeline().parameters.p_pl_inp_file",
-									"type": "Expression"
-								}
-							},
-							"stylclrtable": {
-								"ds_sink_fn": "stylclr"
-							},
-							"prodtable": {
-								"ds_sink_fn": "product"
-							},
-							"styletable": {
-								"ds_sink_fn": "style"
-							},
-							"subcattable": {
-								"ds_sink_fn": "subCatg"
-							},
-							"catgtable": {
-								"ds_sink_fn": "catg"
-							},
-							"depttable": {
-								"ds_sink_fn": "dept"
-							}
-						}
-					},
-					"compute": {
-						"coreCount": 8,
-						"computeType": "General"
-					},
-					"traceLevel": "Fine"
-				}
-			},
-			{
 				"name": "Get drive files",
 				"type": "GetMetadata",
 				"dependsOn": [],
@@ -188,6 +88,116 @@
 												},
 												"userProperties": [],
 												"typeProperties": {
+													"compute": {
+														"coreCount": 8,
+														"computeType": "General"
+													},
+													"traceLevel": "Fine"
+												}
+											}
+										]
+									},
+									{
+										"value": "pricestate",
+										"activities": [
+											{
+												"name": "pricestate",
+												"type": "ExecuteDataFlow",
+												"state": "Inactive",
+												"onInactiveMarkAs": "Succeeded",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"dataflow": {
+														"referenceName": "df_pricestate",
+														"type": "DataFlowReference",
+														"datasetParameters": {
+															"adlsPricestate": {
+																"p_ds_container": {
+																	"value": "@pipeline().parameters.p_pl_container",
+																	"type": "Expression"
+																},
+																"p_ds_file_name": {
+																	"value": "@pipeline().parameters.p_pl_inp_file",
+																	"type": "Expression"
+																}
+															},
+															"statesink": {
+																"ds_sink_fn": "price_state"
+															},
+															"substatesink": {
+																"ds_sink_fn": "price_substate"
+															}
+														}
+													},
+													"compute": {
+														"coreCount": 8,
+														"computeType": "General"
+													},
+													"traceLevel": "Fine"
+												}
+											}
+										]
+									},
+									{
+										"value": "prod",
+										"activities": [
+											{
+												"name": "prod",
+												"type": "ExecuteDataFlow",
+												"state": "Inactive",
+												"onInactiveMarkAs": "Succeeded",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"dataflow": {
+														"referenceName": "df_prod",
+														"type": "DataFlowReference",
+														"datasetParameters": {
+															"adlsprod": {
+																"p_ds_container": {
+																	"value": "@pipeline().parameters.p_pl_container",
+																	"type": "Expression"
+																},
+																"p_ds_file_name": {
+																	"value": "@pipeline().parameters.p_pl_inp_file",
+																	"type": "Expression"
+																}
+															},
+															"stylclrtable": {
+																"ds_sink_fn": "stylclr"
+															},
+															"prodtable": {
+																"ds_sink_fn": "product"
+															},
+															"styletable": {
+																"ds_sink_fn": "style"
+															},
+															"subcattable": {
+																"ds_sink_fn": "subCatg"
+															},
+															"catgtable": {
+																"ds_sink_fn": "catg"
+															},
+															"depttable": {
+																"ds_sink_fn": "dept"
+															}
+														}
+													},
 													"compute": {
 														"coreCount": 8,
 														"computeType": "General"
