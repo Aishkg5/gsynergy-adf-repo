@@ -26,6 +26,13 @@
 						"type": "DatasetReference"
 					},
 					"name": "districttable"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_adls_parquet",
+						"type": "DatasetReference"
+					},
+					"name": "streettable"
 				}
 			],
 			"transformations": [
@@ -40,6 +47,9 @@
 				},
 				{
 					"name": "distinctdistrict"
+				},
+				{
+					"name": "strtselect"
 				}
 			],
 			"scriptLines": [
@@ -73,6 +83,13 @@
 				"     skipDuplicateMapOutputs: true) ~> districtselect",
 				"districtselect aggregate(groupBy(dstr),",
 				"     each(match(name!='dstr'), $$ = first($$))) ~> distinctdistrict",
+				"adlsrtloc select(mapColumn(",
+				"          str,",
+				"          str_label,",
+				"          dstr",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> strtselect",
 				"distinctregion sink(allowSchemaDrift: true,",
 				"     validateSchema: true,",
 				"     format: 'parquet',",
@@ -90,7 +107,16 @@
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     partitionBy('hash', 1)) ~> districttable"
+				"     partitionBy('hash', 1)) ~> districttable",
+				"strtselect sink(allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> streettable"
 			]
 		}
 	}
