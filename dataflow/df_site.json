@@ -13,12 +13,36 @@
 				}
 			],
 			"sinks": [],
-			"transformations": [],
+			"transformations": [
+				{
+					"name": "chnlselect"
+				},
+				{
+					"name": "aggregate1"
+				}
+			],
 			"scriptLines": [
-				"source(allowSchemaDrift: true,",
+				"source(output(",
+				"          site_id as string,",
+				"          site_label as string,",
+				"          subchnl_id as string,",
+				"          subchnl_label as string,",
+				"          chnl_id as string,",
+				"          chnl_label as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
 				"     validateSchema: true,",
 				"     inferDriftedColumnTypes: true,",
-				"     ignoreNoFilesFound: false) ~> adlsposite"
+				"     ignoreNoFilesFound: false) ~> adlsposite",
+				"adlsposite select(mapColumn(",
+				"          chnl_id,",
+				"          chnl_label",
+				"     ),",
+				"     partitionBy('hash', 1),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> chnlselect",
+				"chnlselect aggregate(groupBy(chnl_id),",
+				"     chnl_label = first(chnl_label)) ~> aggregate1"
 			]
 		}
 	}
