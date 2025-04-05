@@ -1,0 +1,90 @@
+{
+	"name": "df_loc",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_adls",
+						"type": "DatasetReference"
+					},
+					"name": "invlocadls"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_adls_parquet",
+						"type": "DatasetReference"
+					},
+					"name": "loctable"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_adls_parquet",
+						"type": "DatasetReference"
+					},
+					"name": "loctypetable"
+				}
+			],
+			"transformations": [
+				{
+					"name": "locselect"
+				},
+				{
+					"name": "loctypeselect"
+				},
+				{
+					"name": "distinctloctype"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          loc as short,",
+				"          loc_label as string,",
+				"          loctype as string,",
+				"          loctype_label as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     inferDriftedColumnTypes: true,",
+				"     ignoreNoFilesFound: false,",
+				"     partitionBy('hash', 1)) ~> invlocadls",
+				"invlocadls select(mapColumn(",
+				"          loc,",
+				"          loc_label,",
+				"          loctype",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> locselect",
+				"invlocadls select(mapColumn(",
+				"          loctype,",
+				"          loctype_label",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> loctypeselect",
+				"loctypeselect aggregate(groupBy(loctype),",
+				"     loctype_label = first(loctype_label)) ~> distinctloctype",
+				"locselect sink(allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> loctable",
+				"distinctloctype sink(allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> loctypetable"
+			]
+		}
+	}
+}
