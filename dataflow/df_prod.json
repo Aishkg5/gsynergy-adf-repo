@@ -1,0 +1,149 @@
+{
+	"name": "df_prod",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_adls",
+						"type": "DatasetReference"
+					},
+					"name": "adlsprod"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_adls_parquet",
+						"type": "DatasetReference"
+					},
+					"name": "stylclrtable"
+				}
+			],
+			"transformations": [
+				{
+					"name": "product"
+				},
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "style"
+				},
+				{
+					"name": "styles"
+				},
+				{
+					"name": "aggregate2"
+				},
+				{
+					"name": "subcatselect"
+				},
+				{
+					"name": "distinctsubcat"
+				},
+				{
+					"name": "catselect"
+				},
+				{
+					"name": "ditsinctCatg"
+				},
+				{
+					"name": "selectDept"
+				},
+				{
+					"name": "aggregate3"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          sku_id as string,",
+				"          sku_label as string,",
+				"          stylclr_id as string,",
+				"          stylclr_label as string,",
+				"          styl_id as string,",
+				"          styl_label as string,",
+				"          subcat_id as short,",
+				"          subcat_label as string,",
+				"          cat_id as short,",
+				"          cat_label as string,",
+				"          dept_id as short,",
+				"          dept_label as string,",
+				"          issvc as boolean,",
+				"          isasmbly as boolean,",
+				"          isnfs as boolean",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     inferDriftedColumnTypes: true,",
+				"     ignoreNoFilesFound: false) ~> adlsprod",
+				"adlsprod select(mapColumn(",
+				"          sku_id,",
+				"          sku_label,",
+				"          stylclr_id,",
+				"          issvc,",
+				"          isasmbly,",
+				"          isnfs",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> product",
+				"style aggregate(groupBy(stylclr_id),",
+				"     each(match(name!='stylclr_id'), $$ = first($$))) ~> aggregate1",
+				"adlsprod select(mapColumn(",
+				"          stylclr_id,",
+				"          stylclr_label,",
+				"          styl_id",
+				"     ),",
+				"     partitionBy('hash', 1),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> style",
+				"adlsprod select(mapColumn(",
+				"          styl_id,",
+				"          styl_label,",
+				"          subcat_id",
+				"     ),",
+				"     partitionBy('hash', 1),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> styles",
+				"styles aggregate(groupBy(styl_id),",
+				"     each(match(name!='styl_id'), $$ = first($$))) ~> aggregate2",
+				"adlsprod select(mapColumn(",
+				"          subcat_id,",
+				"          subcat_label,",
+				"          cat_id",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> subcatselect",
+				"subcatselect aggregate(groupBy(subcat_id),",
+				"     each(match(name!='subcat_id'), $$ = first($$))) ~> distinctsubcat",
+				"adlsprod select(mapColumn(",
+				"          cat_id,",
+				"          cat_label,",
+				"          dept_id",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> catselect",
+				"catselect aggregate(groupBy(cat_id),",
+				"     each(match(name!='cat_id'), $$ = first($$))) ~> ditsinctCatg",
+				"adlsprod select(mapColumn(",
+				"          dept_id,",
+				"          dept_label",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> selectDept",
+				"selectDept aggregate(groupBy(dept_id),",
+				"     dept_label = first(dept_label)) ~> aggregate3",
+				"aggregate1 sink(allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> stylclrtable"
+			]
+		}
+	}
+}
