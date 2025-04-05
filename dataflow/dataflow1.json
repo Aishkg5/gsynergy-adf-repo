@@ -19,6 +19,13 @@
 						"type": "DatasetReference"
 					},
 					"name": "statesink"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_adls_parquet",
+						"type": "DatasetReference"
+					},
+					"name": "substatesink"
 				}
 			],
 			"transformations": [
@@ -55,7 +62,15 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> statesink"
+				"     skipDuplicateMapOutputs: true) ~> statesink",
+				"substate sink(allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> substatesink"
 			]
 		}
 	}
