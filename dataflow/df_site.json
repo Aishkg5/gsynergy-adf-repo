@@ -1,0 +1,25 @@
+{
+	"name": "df_site",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_adls",
+						"type": "DatasetReference"
+					},
+					"name": "adlsposite"
+				}
+			],
+			"sinks": [],
+			"transformations": [],
+			"scriptLines": [
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     inferDriftedColumnTypes: true,",
+				"     ignoreNoFilesFound: false) ~> adlsposite"
+			]
+		}
+	}
+}

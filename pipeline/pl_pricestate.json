@@ -88,6 +88,10 @@
 												},
 												"userProperties": [],
 												"typeProperties": {
+													"dataflow": {
+														"referenceName": "df_site",
+														"type": "DataFlowReference"
+													},
 													"compute": {
 														"coreCount": 8,
 														"computeType": "General"
