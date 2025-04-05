@@ -37,7 +37,13 @@
 				}
 			],
 			"scriptLines": [
-				"source(allowSchemaDrift: true,",
+				"source(output(",
+				"          substate_id as string,",
+				"          substate_label as string,",
+				"          state_id as string,",
+				"          state_label as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
 				"     validateSchema: true,",
 				"     inferDriftedColumnTypes: true,",
 				"     ignoreNoFilesFound: false,",
