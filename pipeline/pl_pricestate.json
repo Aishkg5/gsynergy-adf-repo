@@ -20,8 +20,14 @@
 						"type": "DataFlowReference",
 						"datasetParameters": {
 							"adlsPricestate": {
-								"p_ds_container": "drivefiles",
-								"p_ds_file_name": "hier.pricestate.dlm"
+								"p_ds_container": {
+									"value": "@pipeline().parameters.p_pl_container",
+									"type": "Expression"
+								},
+								"p_ds_file_name": {
+									"value": "@pipeline().parameters.p_pl_inp_file",
+									"type": "Expression"
+								}
 							},
 							"statesink": {
 								"ds_sink_fn": "price_state"
