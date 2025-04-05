@@ -91,7 +91,28 @@
 												"typeProperties": {
 													"dataflow": {
 														"referenceName": "df_site",
-														"type": "DataFlowReference"
+														"type": "DataFlowReference",
+														"datasetParameters": {
+															"adlsposite": {
+																"p_ds_container": {
+																	"value": "@pipeline().parameters.p_pl_container",
+																	"type": "Expression"
+																},
+																"p_ds_file_name": {
+																	"value": "@pipeline().parameters.p_pl_inp_file",
+																	"type": "Expression"
+																}
+															},
+															"subchnl": {
+																"ds_sink_fn": "subchnl"
+															},
+															"chnltable": {
+																"ds_sink_fn": "chnl"
+															},
+															"sitetable": {
+																"ds_sink_fn": "site"
+															}
+														}
 													},
 													"compute": {
 														"coreCount": 8,
