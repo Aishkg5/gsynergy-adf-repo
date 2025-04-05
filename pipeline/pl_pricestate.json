@@ -53,7 +53,37 @@
 				"typeProperties": {
 					"dataflow": {
 						"referenceName": "df_prod",
-						"type": "DataFlowReference"
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"adlsprod": {
+								"p_ds_container": {
+									"value": "@pipeline().parameters.p_pl_container",
+									"type": "Expression"
+								},
+								"p_ds_file_name": {
+									"value": "@pipeline().parameters.p_pl_inp_file",
+									"type": "Expression"
+								}
+							},
+							"stylclrtable": {
+								"ds_sink_fn": "stylclr"
+							},
+							"prodtable": {
+								"ds_sink_fn": "product"
+							},
+							"styletable": {
+								"ds_sink_fn": "style"
+							},
+							"subcattable": {
+								"ds_sink_fn": "subCatg"
+							},
+							"catgtable": {
+								"ds_sink_fn": "catg"
+							},
+							"depttable": {
+								"ds_sink_fn": "dept"
+							}
+						}
 					},
 					"compute": {
 						"coreCount": 8,
@@ -63,6 +93,14 @@
 				}
 			}
 		],
+		"parameters": {
+			"p_pl_container": {
+				"type": "string"
+			},
+			"p_pl_inp_file": {
+				"type": "string"
+			}
+		},
 		"annotations": []
 	}
 }
