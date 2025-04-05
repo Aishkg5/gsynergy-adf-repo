@@ -12,13 +12,47 @@
 					"name": "adlsposite"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_adls_parquet",
+						"type": "DatasetReference"
+					},
+					"name": "subchnl"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_adls_parquet",
+						"type": "DatasetReference"
+					},
+					"name": "chnltable"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_adls_parquet",
+						"type": "DatasetReference"
+					},
+					"name": "sitetable"
+				}
+			],
 			"transformations": [
 				{
 					"name": "chnlselect"
 				},
 				{
-					"name": "aggregate1"
+					"name": "distinctchnl"
+				},
+				{
+					"name": "subchnlselect"
+				},
+				{
+					"name": "distinctsubchnl"
+				},
+				{
+					"name": "siteselect"
+				},
+				{
+					"name": "distictsite"
 				}
 			],
 			"scriptLines": [
@@ -42,7 +76,53 @@
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> chnlselect",
 				"chnlselect aggregate(groupBy(chnl_id),",
-				"     chnl_label = first(chnl_label)) ~> aggregate1"
+				"     chnl_label = first(chnl_label)) ~> distinctchnl",
+				"adlsposite select(mapColumn(",
+				"          subchnl_id,",
+				"          subchnl_label,",
+				"          chnl_id",
+				"     ),",
+				"     partitionBy('hash', 1),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> subchnlselect",
+				"subchnlselect aggregate(groupBy(subchnl_id),",
+				"     each(match(name!='subchnl_id'), $$ = first($$))) ~> distinctsubchnl",
+				"adlsposite select(mapColumn(",
+				"          site_id,",
+				"          site_label,",
+				"          subchnl_id",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> siteselect",
+				"siteselect aggregate(groupBy(site_id),",
+				"     each(match(name!='site_id'), $$ = first($$))) ~> distictsite",
+				"distinctsubchnl sink(allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> subchnl",
+				"distinctchnl sink(allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> chnltable",
+				"distictsite sink(allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> sitetable"
 			]
 		}
 	}
