@@ -1,5 +1,5 @@
 {
-	"name": "dataflow1",
+	"name": "df_pricestate",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
@@ -56,13 +56,14 @@
 				"     state_label = first(state_label),",
 				"     partitionBy('hash', 1)) ~> state",
 				"state sink(allowSchemaDrift: true,",
-				"     validateSchema: false,",
+				"     validateSchema: true,",
 				"     format: 'parquet',",
 				"     umask: 0022,",
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> statesink",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> statesink",
 				"substate sink(allowSchemaDrift: true,",
 				"     validateSchema: true,",
 				"     format: 'parquet',",

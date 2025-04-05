@@ -16,12 +16,18 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "dataflow1",
+						"referenceName": "df_pricestate",
 						"type": "DataFlowReference",
 						"datasetParameters": {
 							"adlsPricestate": {
 								"p_ds_container": "drivefiles",
 								"p_ds_file_name": "hier.pricestate.dlm"
+							},
+							"statesink": {
+								"ds_sink_fn": "price_state"
+							},
+							"substatesink": {
+								"ds_sink_fn": "price_substate"
 							}
 						}
 					},
