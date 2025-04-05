@@ -15,6 +15,10 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().ds_sink_fn",
+					"type": "Expression"
+				},
 				"fileSystem": "oltpraw"
 			},
 			"compressionCodec": "snappy"
