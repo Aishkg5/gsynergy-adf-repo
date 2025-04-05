@@ -15,16 +15,14 @@
 			"sinks": [],
 			"transformations": [],
 			"scriptLines": [
-				"source(output(",
-				"          {substate_id|substate_label|state_id|state_label} as string",
-				"     ),",
-				"     allowSchemaDrift: true,",
+				"source(allowSchemaDrift: true,",
 				"     validateSchema: true,",
 				"     inferDriftedColumnTypes: true,",
 				"     ignoreNoFilesFound: false,",
 				"     enableCdc: true,",
 				"     mode: 'read',",
-				"     skipInitialLoad: false) ~> adlsPricestate"
+				"     skipInitialLoad: false,",
+				"     partitionBy('hash', 1)) ~> adlsPricestate"
 			]
 		}
 	}
