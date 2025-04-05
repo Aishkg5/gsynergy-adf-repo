@@ -12,8 +12,23 @@
 					"name": "adlsPricestate"
 				}
 			],
-			"sinks": [],
-			"transformations": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_adls",
+						"type": "DatasetReference"
+					},
+					"name": "statesink"
+				}
+			],
+			"transformations": [
+				{
+					"name": "substate"
+				},
+				{
+					"name": "state"
+				}
+			],
 			"scriptLines": [
 				"source(allowSchemaDrift: true,",
 				"     validateSchema: true,",
@@ -22,7 +37,24 @@
 				"     enableCdc: true,",
 				"     mode: 'read',",
 				"     skipInitialLoad: false,",
-				"     partitionBy('hash', 1)) ~> adlsPricestate"
+				"     partitionBy('hash', 1)) ~> adlsPricestate",
+				"adlsPricestate select(mapColumn(",
+				"          substate_id,",
+				"          substate_label,",
+				"          state_id",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> substate",
+				"adlsPricestate aggregate(groupBy(state_id),",
+				"     state_label = first(state_label),",
+				"     partitionBy('hash', 1)) ~> state",
+				"state sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> statesink"
 			]
 		}
 	}
