@@ -362,6 +362,9 @@
 			},
 			"p_pl_inp_file": {
 				"type": "string"
+			},
+			"p_pl_dest_container": {
+				"type": "string"
 			}
 		},
 		"annotations": []
