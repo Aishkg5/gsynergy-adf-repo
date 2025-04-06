@@ -364,7 +364,8 @@
 				"type": "string"
 			},
 			"p_pl_dest_container": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "oltpraw"
 			}
 		},
 		"annotations": []
