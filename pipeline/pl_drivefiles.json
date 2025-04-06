@@ -299,13 +299,25 @@
 																"p_ds_file_name": "@item().name"
 															},
 															"regn": {
-																"ds_sink_fn": "region"
+																"ds_sink_fn": "region",
+																"p_ds_sink_container": {
+																	"value": "@pipeline().parameters.p_pl_dest_container",
+																	"type": "Expression"
+																}
 															},
 															"districttable": {
-																"ds_sink_fn": "district"
+																"ds_sink_fn": "district",
+																"p_ds_sink_container": {
+																	"value": "@pipeline().parameters.p_pl_dest_container",
+																	"type": "Expression"
+																}
 															},
 															"streettable": {
-																"ds_sink_fn": "street"
+																"ds_sink_fn": "street",
+																"p_ds_sink_container": {
+																	"value": "@pipeline().parameters.p_pl_dest_container",
+																	"type": "Expression"
+																}
 															}
 														}
 													},
