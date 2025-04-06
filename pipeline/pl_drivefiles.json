@@ -127,8 +127,6 @@
 											{
 												"name": "pricestate",
 												"type": "ExecuteDataFlow",
-												"state": "Inactive",
-												"onInactiveMarkAs": "Succeeded",
 												"dependsOn": [],
 												"policy": {
 													"timeout": "0.12:00:00",
@@ -176,8 +174,6 @@
 											{
 												"name": "prod",
 												"type": "ExecuteDataFlow",
-												"state": "Inactive",
-												"onInactiveMarkAs": "Succeeded",
 												"dependsOn": [],
 												"policy": {
 													"timeout": "0.12:00:00",
@@ -237,8 +233,6 @@
 											{
 												"name": "rtlloc",
 												"type": "ExecuteDataFlow",
-												"state": "Inactive",
-												"onInactiveMarkAs": "Succeeded",
 												"dependsOn": [],
 												"policy": {
 													"timeout": "0.12:00:00",
@@ -285,8 +279,6 @@
 									{
 										"name": "Copytooltp",
 										"type": "Copy",
-										"state": "Inactive",
-										"onInactiveMarkAs": "Succeeded",
 										"dependsOn": [],
 										"policy": {
 											"timeout": "0.12:00:00",
