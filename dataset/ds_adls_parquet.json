@@ -8,6 +8,9 @@
 		"parameters": {
 			"ds_sink_fn": {
 				"type": "string"
+			},
+			"p_ds_sink_container": {
+				"type": "string"
 			}
 		},
 		"annotations": [],
