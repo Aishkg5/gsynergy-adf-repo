@@ -21,7 +21,7 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('factoryName'), '/pl_pricestate')]",
+			"name": "[concat(parameters('factoryName'), '/pl_drivefiles')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -101,8 +101,6 @@
 													{
 														"name": "site",
 														"type": "ExecuteDataFlow",
-														"state": "Inactive",
-														"onInactiveMarkAs": "Succeeded",
 														"dependsOn": [],
 														"policy": {
 															"timeout": "0.12:00:00",
@@ -129,13 +127,25 @@
 																		}
 																	},
 																	"subchnl": {
-																		"ds_sink_fn": "subchnl"
+																		"ds_sink_fn": "subchnl",
+																		"p_ds_sink_container": {
+																			"value": "@pipeline().parameters.p_pl_dest_container",
+																			"type": "Expression"
+																		}
 																	},
 																	"chnltable": {
-																		"ds_sink_fn": "chnl"
+																		"ds_sink_fn": "chnl",
+																		"p_ds_sink_container": {
+																			"value": "@pipeline().parameters.p_pl_dest_container",
+																			"type": "Expression"
+																		}
 																	},
 																	"sitetable": {
-																		"ds_sink_fn": "site"
+																		"ds_sink_fn": "site",
+																		"p_ds_sink_container": {
+																			"value": "@pipeline().parameters.p_pl_dest_container",
+																			"type": "Expression"
+																		}
 																	}
 																},
 																"linkedServiceParameters": {}
@@ -156,8 +166,6 @@
 													{
 														"name": "pricestate",
 														"type": "ExecuteDataFlow",
-														"state": "Inactive",
-														"onInactiveMarkAs": "Succeeded",
 														"dependsOn": [],
 														"policy": {
 															"timeout": "0.12:00:00",
@@ -184,10 +192,18 @@
 																		}
 																	},
 																	"statesink": {
-																		"ds_sink_fn": "price_state"
+																		"ds_sink_fn": "price_state",
+																		"p_ds_sink_container": {
+																			"value": "@pipeline().parameters.p_pl_dest_container",
+																			"type": "Expression"
+																		}
 																	},
 																	"substatesink": {
-																		"ds_sink_fn": "price_substate"
+																		"ds_sink_fn": "price_substate",
+																		"p_ds_sink_container": {
+																			"value": "@pipeline().parameters.p_pl_dest_container",
+																			"type": "Expression"
+																		}
 																	}
 																},
 																"linkedServiceParameters": {}
@@ -208,8 +224,6 @@
 													{
 														"name": "prod",
 														"type": "ExecuteDataFlow",
-														"state": "Inactive",
-														"onInactiveMarkAs": "Succeeded",
 														"dependsOn": [],
 														"policy": {
 															"timeout": "0.12:00:00",
@@ -236,22 +250,46 @@
 																		}
 																	},
 																	"stylclrtable": {
-																		"ds_sink_fn": "stylclr"
+																		"ds_sink_fn": "stylclr",
+																		"p_ds_sink_container": {
+																			"value": "@pipeline().parameters.p_pl_dest_container",
+																			"type": "Expression"
+																		}
 																	},
 																	"prodtable": {
-																		"ds_sink_fn": "product"
+																		"ds_sink_fn": "product",
+																		"p_ds_sink_container": {
+																			"value": "@pipeline().parameters.p_pl_dest_container",
+																			"type": "Expression"
+																		}
 																	},
 																	"styletable": {
-																		"ds_sink_fn": "style"
+																		"ds_sink_fn": "style",
+																		"p_ds_sink_container": {
+																			"value": "@pipeline().parameters.p_pl_dest_container",
+																			"type": "Expression"
+																		}
 																	},
 																	"subcattable": {
-																		"ds_sink_fn": "subCatg"
+																		"ds_sink_fn": "subCatg",
+																		"p_ds_sink_container": {
+																			"value": "@pipeline().parameters.p_pl_dest_container",
+																			"type": "Expression"
+																		}
 																	},
 																	"catgtable": {
-																		"ds_sink_fn": "catg"
+																		"ds_sink_fn": "catg",
+																		"p_ds_sink_container": {
+																			"value": "@pipeline().parameters.p_pl_dest_container",
+																			"type": "Expression"
+																		}
 																	},
 																	"depttable": {
-																		"ds_sink_fn": "dept"
+																		"ds_sink_fn": "dept",
+																		"p_ds_sink_container": {
+																			"value": "@pipeline().parameters.p_pl_dest_container",
+																			"type": "Expression"
+																		}
 																	}
 																},
 																"linkedServiceParameters": {}
@@ -295,13 +333,25 @@
 																		"p_ds_file_name": "@item().name"
 																	},
 																	"regn": {
-																		"ds_sink_fn": "region"
+																		"ds_sink_fn": "region",
+																		"p_ds_sink_container": {
+																			"value": "@pipeline().parameters.p_pl_dest_container",
+																			"type": "Expression"
+																		}
 																	},
 																	"districttable": {
-																		"ds_sink_fn": "district"
+																		"ds_sink_fn": "district",
+																		"p_ds_sink_container": {
+																			"value": "@pipeline().parameters.p_pl_dest_container",
+																			"type": "Expression"
+																		}
 																	},
 																	"streettable": {
-																		"ds_sink_fn": "street"
+																		"ds_sink_fn": "street",
+																		"p_ds_sink_container": {
+																			"value": "@pipeline().parameters.p_pl_dest_container",
+																			"type": "Expression"
+																		}
 																	}
 																},
 																"linkedServiceParameters": {}
@@ -385,6 +435,10 @@
 															"ds_sink_fn": {
 																"value": "@split(item().name,'.')[1]",
 																"type": "Expression"
+															},
+															"p_ds_sink_container": {
+																"value": "@pipeline().parameters.p_pl_dest_container",
+																"type": "Expression"
 															}
 														}
 													}
@@ -407,6 +461,10 @@
 					},
 					"p_pl_inp_file": {
 						"type": "string"
+					},
+					"p_pl_dest_container": {
+						"type": "string",
+						"defaultValue": "oltpraw"
 					}
 				},
 				"annotations": []
@@ -474,6 +532,9 @@
 				"parameters": {
 					"ds_sink_fn": {
 						"type": "string"
+					},
+					"p_ds_sink_container": {
+						"type": "string"
 					}
 				},
 				"annotations": [],
@@ -511,6 +572,102 @@
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_loc')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_adls",
+								"type": "DatasetReference"
+							},
+							"name": "invlocadls"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ds_adls_parquet",
+								"type": "DatasetReference"
+							},
+							"name": "loctable"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_adls_parquet",
+								"type": "DatasetReference"
+							},
+							"name": "loctypetable"
+						}
+					],
+					"transformations": [
+						{
+							"name": "locselect"
+						},
+						{
+							"name": "loctypeselect"
+						},
+						{
+							"name": "distinctloctype"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          loc as short,",
+						"          loc_label as string,",
+						"          loctype as string,",
+						"          loctype_label as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: true,",
+						"     inferDriftedColumnTypes: true,",
+						"     ignoreNoFilesFound: false,",
+						"     partitionBy('hash', 1)) ~> invlocadls",
+						"invlocadls select(mapColumn(",
+						"          loc,",
+						"          loc_label,",
+						"          loctype",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> locselect",
+						"invlocadls select(mapColumn(",
+						"          loctype,",
+						"          loctype_label",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> loctypeselect",
+						"loctypeselect aggregate(groupBy(loctype),",
+						"     loctype_label = first(loctype_label)) ~> distinctloctype",
+						"locselect sink(allowSchemaDrift: true,",
+						"     validateSchema: true,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> loctable",
+						"distinctloctype sink(allowSchemaDrift: true,",
+						"     validateSchema: true,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> loctypetable"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_adls')]",
+				"[concat(variables('factoryId'), '/datasets/ds_adls_parquet')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/df_pricestate')]",
@@ -836,141 +993,6 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/df_site')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "ds_adls",
-								"type": "DatasetReference"
-							},
-							"name": "adlsposite"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "ds_adls_parquet",
-								"type": "DatasetReference"
-							},
-							"name": "subchnl"
-						},
-						{
-							"dataset": {
-								"referenceName": "ds_adls_parquet",
-								"type": "DatasetReference"
-							},
-							"name": "chnltable"
-						},
-						{
-							"dataset": {
-								"referenceName": "ds_adls_parquet",
-								"type": "DatasetReference"
-							},
-							"name": "sitetable"
-						}
-					],
-					"transformations": [
-						{
-							"name": "chnlselect"
-						},
-						{
-							"name": "distinctchnl"
-						},
-						{
-							"name": "subchnlselect"
-						},
-						{
-							"name": "distinctsubchnl"
-						},
-						{
-							"name": "siteselect"
-						},
-						{
-							"name": "distictsite"
-						}
-					],
-					"scriptLines": [
-						"source(output(",
-						"          site_id as string,",
-						"          site_label as string,",
-						"          subchnl_id as string,",
-						"          subchnl_label as string,",
-						"          chnl_id as string,",
-						"          chnl_label as string",
-						"     ),",
-						"     allowSchemaDrift: true,",
-						"     validateSchema: true,",
-						"     inferDriftedColumnTypes: true,",
-						"     ignoreNoFilesFound: false) ~> adlsposite",
-						"adlsposite select(mapColumn(",
-						"          chnl_id,",
-						"          chnl_label",
-						"     ),",
-						"     partitionBy('hash', 1),",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> chnlselect",
-						"chnlselect aggregate(groupBy(chnl_id),",
-						"     chnl_label = first(chnl_label)) ~> distinctchnl",
-						"adlsposite select(mapColumn(",
-						"          subchnl_id,",
-						"          subchnl_label,",
-						"          chnl_id",
-						"     ),",
-						"     partitionBy('hash', 1),",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> subchnlselect",
-						"subchnlselect aggregate(groupBy(subchnl_id),",
-						"     each(match(name!='subchnl_id'), $$ = first($$))) ~> distinctsubchnl",
-						"adlsposite select(mapColumn(",
-						"          site_id,",
-						"          site_label,",
-						"          subchnl_id",
-						"     ),",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> siteselect",
-						"siteselect aggregate(groupBy(site_id),",
-						"     each(match(name!='site_id'), $$ = first($$))) ~> distictsite",
-						"distinctsubchnl sink(allowSchemaDrift: true,",
-						"     validateSchema: true,",
-						"     format: 'parquet',",
-						"     umask: 0022,",
-						"     preCommands: [],",
-						"     postCommands: [],",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true,",
-						"     partitionBy('hash', 1)) ~> subchnl",
-						"distinctchnl sink(allowSchemaDrift: true,",
-						"     validateSchema: true,",
-						"     format: 'parquet',",
-						"     umask: 0022,",
-						"     preCommands: [],",
-						"     postCommands: [],",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true,",
-						"     partitionBy('hash', 1)) ~> chnltable",
-						"distictsite sink(allowSchemaDrift: true,",
-						"     validateSchema: true,",
-						"     format: 'parquet',",
-						"     umask: 0022,",
-						"     preCommands: [],",
-						"     postCommands: [],",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true,",
-						"     partitionBy('hash', 1)) ~> sitetable"
-					]
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/ds_adls')]",
-				"[concat(variables('factoryId'), '/datasets/ds_adls_parquet')]"
-			]
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/df_rtlloc')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
@@ -1100,7 +1122,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/df_loc')]",
+			"name": "[concat(parameters('factoryName'), '/df_site')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -1112,7 +1134,7 @@
 								"referenceName": "ds_adls",
 								"type": "DatasetReference"
 							},
-							"name": "invlocadls"
+							"name": "adlsposite"
 						}
 					],
 					"sinks": [
@@ -1121,55 +1143,85 @@
 								"referenceName": "ds_adls_parquet",
 								"type": "DatasetReference"
 							},
-							"name": "loctable"
+							"name": "subchnl"
 						},
 						{
 							"dataset": {
 								"referenceName": "ds_adls_parquet",
 								"type": "DatasetReference"
 							},
-							"name": "loctypetable"
+							"name": "chnltable"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_adls_parquet",
+								"type": "DatasetReference"
+							},
+							"name": "sitetable"
 						}
 					],
 					"transformations": [
 						{
-							"name": "locselect"
+							"name": "chnlselect"
 						},
 						{
-							"name": "loctypeselect"
+							"name": "distinctchnl"
 						},
 						{
-							"name": "distinctloctype"
+							"name": "subchnlselect"
+						},
+						{
+							"name": "distinctsubchnl"
+						},
+						{
+							"name": "siteselect"
+						},
+						{
+							"name": "distictsite"
 						}
 					],
 					"scriptLines": [
 						"source(output(",
-						"          loc as short,",
-						"          loc_label as string,",
-						"          loctype as string,",
-						"          loctype_label as string",
+						"          site_id as string,",
+						"          site_label as string,",
+						"          subchnl_id as string,",
+						"          subchnl_label as string,",
+						"          chnl_id as string,",
+						"          chnl_label as string",
 						"     ),",
 						"     allowSchemaDrift: true,",
 						"     validateSchema: true,",
 						"     inferDriftedColumnTypes: true,",
-						"     ignoreNoFilesFound: false,",
-						"     partitionBy('hash', 1)) ~> invlocadls",
-						"invlocadls select(mapColumn(",
-						"          loc,",
-						"          loc_label,",
-						"          loctype",
+						"     ignoreNoFilesFound: false) ~> adlsposite",
+						"adlsposite select(mapColumn(",
+						"          chnl_id,",
+						"          chnl_label",
+						"     ),",
+						"     partitionBy('hash', 1),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> chnlselect",
+						"chnlselect aggregate(groupBy(chnl_id),",
+						"     chnl_label = first(chnl_label)) ~> distinctchnl",
+						"adlsposite select(mapColumn(",
+						"          subchnl_id,",
+						"          subchnl_label,",
+						"          chnl_id",
+						"     ),",
+						"     partitionBy('hash', 1),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> subchnlselect",
+						"subchnlselect aggregate(groupBy(subchnl_id),",
+						"     each(match(name!='subchnl_id'), $$ = first($$))) ~> distinctsubchnl",
+						"adlsposite select(mapColumn(",
+						"          site_id,",
+						"          site_label,",
+						"          subchnl_id",
 						"     ),",
 						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> locselect",
-						"invlocadls select(mapColumn(",
-						"          loctype,",
-						"          loctype_label",
-						"     ),",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> loctypeselect",
-						"loctypeselect aggregate(groupBy(loctype),",
-						"     loctype_label = first(loctype_label)) ~> distinctloctype",
-						"locselect sink(allowSchemaDrift: true,",
+						"     skipDuplicateMapOutputs: true) ~> siteselect",
+						"siteselect aggregate(groupBy(site_id),",
+						"     each(match(name!='site_id'), $$ = first($$))) ~> distictsite",
+						"distinctsubchnl sink(allowSchemaDrift: true,",
 						"     validateSchema: true,",
 						"     format: 'parquet',",
 						"     umask: 0022,",
@@ -1177,8 +1229,8 @@
 						"     postCommands: [],",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
-						"     partitionBy('hash', 1)) ~> loctable",
-						"distinctloctype sink(allowSchemaDrift: true,",
+						"     partitionBy('hash', 1)) ~> subchnl",
+						"distinctchnl sink(allowSchemaDrift: true,",
 						"     validateSchema: true,",
 						"     format: 'parquet',",
 						"     umask: 0022,",
@@ -1186,7 +1238,16 @@
 						"     postCommands: [],",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
-						"     partitionBy('hash', 1)) ~> loctypetable"
+						"     partitionBy('hash', 1)) ~> chnltable",
+						"distictsite sink(allowSchemaDrift: true,",
+						"     validateSchema: true,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> sitetable"
 					]
 				}
 			},
