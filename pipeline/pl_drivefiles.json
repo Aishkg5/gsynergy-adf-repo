@@ -102,13 +102,25 @@
 																}
 															},
 															"subchnl": {
-																"ds_sink_fn": "subchnl"
+																"ds_sink_fn": "subchnl",
+																"p_ds_sink_container": {
+																	"value": "@pipeline().parameters.p_pl_dest_container",
+																	"type": "Expression"
+																}
 															},
 															"chnltable": {
-																"ds_sink_fn": "chnl"
+																"ds_sink_fn": "chnl",
+																"p_ds_sink_container": {
+																	"value": "@pipeline().parameters.p_pl_dest_container",
+																	"type": "Expression"
+																}
 															},
 															"sitetable": {
-																"ds_sink_fn": "site"
+																"ds_sink_fn": "site",
+																"p_ds_sink_container": {
+																	"value": "@pipeline().parameters.p_pl_dest_container",
+																	"type": "Expression"
+																}
 															}
 														}
 													},
@@ -342,6 +354,10 @@
 												"parameters": {
 													"ds_sink_fn": {
 														"value": "@split(item().name,'.')[1]",
+														"type": "Expression"
+													},
+													"p_ds_sink_container": {
+														"value": "@pipeline().parameters.p_pl_dest_container",
 														"type": "Expression"
 													}
 												}
