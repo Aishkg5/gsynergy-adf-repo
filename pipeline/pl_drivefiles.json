@@ -164,10 +164,18 @@
 																}
 															},
 															"statesink": {
-																"ds_sink_fn": "price_state"
+																"ds_sink_fn": "price_state",
+																"p_ds_sink_container": {
+																	"value": "@pipeline().parameters.p_pl_dest_container",
+																	"type": "Expression"
+																}
 															},
 															"substatesink": {
-																"ds_sink_fn": "price_substate"
+																"ds_sink_fn": "price_substate",
+																"p_ds_sink_container": {
+																	"value": "@pipeline().parameters.p_pl_dest_container",
+																	"type": "Expression"
+																}
 															}
 														}
 													},
@@ -211,22 +219,46 @@
 																}
 															},
 															"stylclrtable": {
-																"ds_sink_fn": "stylclr"
+																"ds_sink_fn": "stylclr",
+																"p_ds_sink_container": {
+																	"value": "@pipeline().parameters.p_pl_dest_container",
+																	"type": "Expression"
+																}
 															},
 															"prodtable": {
-																"ds_sink_fn": "product"
+																"ds_sink_fn": "product",
+																"p_ds_sink_container": {
+																	"value": "@pipeline().parameters.p_pl_dest_container",
+																	"type": "Expression"
+																}
 															},
 															"styletable": {
-																"ds_sink_fn": "style"
+																"ds_sink_fn": "style",
+																"p_ds_sink_container": {
+																	"value": "@pipeline().parameters.p_pl_dest_container",
+																	"type": "Expression"
+																}
 															},
 															"subcattable": {
-																"ds_sink_fn": "subCatg"
+																"ds_sink_fn": "subCatg",
+																"p_ds_sink_container": {
+																	"value": "@pipeline().parameters.p_pl_dest_container",
+																	"type": "Expression"
+																}
 															},
 															"catgtable": {
-																"ds_sink_fn": "catg"
+																"ds_sink_fn": "catg",
+																"p_ds_sink_container": {
+																	"value": "@pipeline().parameters.p_pl_dest_container",
+																	"type": "Expression"
+																}
 															},
 															"depttable": {
-																"ds_sink_fn": "dept"
+																"ds_sink_fn": "dept",
+																"p_ds_sink_container": {
+																	"value": "@pipeline().parameters.p_pl_dest_container",
+																	"type": "Expression"
+																}
 															}
 														}
 													},
